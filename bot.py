@@ -2,8 +2,6 @@ import asyncio
 import os
 import json
 import time
-import threading
-import requests
 from aiohttp import web
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
@@ -55,35 +53,30 @@ async def handle_stats(request):
         headers={"Access-Control-Allow-Origin": "*"}
     )
 
-async def handle_options(request):
-    return web.Response(headers={
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    })
-
-def run_bot():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    async def _poll():
-        while True:
-            try:
-                print("Bot polling started...")
-                await dp.start_polling(bot, allowed_updates=["message"])
-            except Exception as e:
-                print("Polling error: " + str(e) + ", retry in 5s...")
-                await asyncio.sleep(5)
-    loop.run_until_complete(_poll())
-
-if __name__ == "__main__":
-    create_db()
+async def run_web():
     port = int(os.environ.get("PORT", 8080))
-    t = threading.Thread(target=run_bot, daemon=True)
-    t.start()
-    print("Starting on port " + str(port))
     app = web.Application()
     app.router.add_get("/", handle_index)
     app.router.add_get("/index.html", handle_index)
     app.router.add_get("/api/stats", handle_stats)
-    app.router.add_options("/api/stats", handle_options)
-    web.run_app(app, host="0.0.0.0", port=port)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print("Web server started on port " + str(port))
+
+async def run_bot():
+    while True:
+        try:
+            print("Bot polling started...")
+            await dp.start_polling(bot, allowed_updates=["message"])
+        except Exception as e:
+            print("Polling error: " + str(e) + ", retry in 5s...")
+            await asyncio.sleep(5)
+
+async def main():
+    create_db()
+    await asyncio.gather(run_web(), run_bot())
+
+if __name__ == "__main__":
+    asyncio.run(main())

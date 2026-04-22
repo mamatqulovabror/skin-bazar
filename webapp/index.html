@@ -326,11 +326,11 @@ const RC2={gold:'#f59e0b',red:'#ef4444',purple:'#a855f7',blue:'#06b6d4'};
 const WC={FT:'wft',FN:'wfn',MW:'wmw',WW:'www'};
 let bal=500,co=0,sk=0,cur=null,spinning=false,dc=false;
 function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1000?Math.round(n/1000)+'K':String(n)}
-function enterApp(){document.getElementById('splash').classList.remove('active');document.getElementById('app').classList.add('active');}
+function enterApp(){document.getElementById('splash').classList.remove('active');document.getElementById('app').classList.add('active');showP('home');}
 function render(){
   const ie=(img,cls)=>'<img src="'+img+'" alt="" class="'+(cls||'')+'" onerror="this.style.background='#222'">';
   document.getElementById('spl-cases').innerHTML=C.map((c,i)=>
-    '<div class="spl-case" onclick="enterApp();setTimeout(()=>openC('+i+'),300)">'+ie(c.i)+'<div class="spl-case-info"><div class="spl-case-name">'+c.n+'</div><div class="spl-case-price">♥ '+fmt(c.p)+'</div></div></div>').join('');
+    '<div class="spl-case" onclick="enterApp();openC('+i+'),300)">'+ie(c.i)+'<div class="spl-case-info"><div class="spl-case-name">'+c.n+'</div><div class="spl-case-price">♥ '+fmt(c.p)+'</div></div></div>').join('');
   document.getElementById('home-cases').innerHTML=C.map((c,i)=>
     '<div class="ccard" onclick="openC('+i+')"><div class="ccard-wrap">'+ie(c.i)+'<span class="ccard-opens">'+c.o+' opens</span></div><div class="ccard-body"><div class="ccard-name">'+c.n+'</div><div class="ccard-price">♥ '+fmt(c.p)+'</div></div></div>').join('');
   document.getElementById('cgrid').innerHTML=C.map((c,i)=>
